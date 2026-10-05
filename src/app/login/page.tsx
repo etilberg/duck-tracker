@@ -7,7 +7,7 @@ import { getSession } from '@/lib/session';
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: Promise<{ error?: string }>;
 }) {
   // Check if already logged in
   const cookieStore = await cookies();
@@ -19,13 +19,15 @@ export default async function LoginPage({
     }
   }
 
+  const { error } = await searchParams;
+
   const errorMessages: Record<string, string> = {
     unauthorized: 'Your GitHub account is not authorized to access this dashboard.',
     invalid_state: 'Login request expired or was tampered with. Please try again.',
     oauth_failed: 'GitHub login failed. Please try again.',
   };
 
-  const errorMessage = searchParams.error ? errorMessages[searchParams.error] : null;
+  const errorMessage = error ? errorMessages[error] : null;
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-yellow-50">
