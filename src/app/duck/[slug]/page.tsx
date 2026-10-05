@@ -7,9 +7,10 @@ import FindDuckClient from './FindDuckClient';
 export default async function DuckPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const duck = await getDuckBySlug(params.slug);
+  const { slug } = await params;
+  const duck = await getDuckBySlug(slug);
   if (!duck) notFound();
 
   const sightings = await getSightings(duck.id);

@@ -15,14 +15,15 @@ async function verifyAdmin(request: NextRequest): Promise<boolean> {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await verifyAdmin(request))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const duck = await getDuckById(params.id);
+    const { id } = await params;
+    const duck = await getDuckById(id);
     if (!duck) {
       return NextResponse.json({ error: 'Duck not found' }, { status: 404 });
     }
@@ -36,18 +37,19 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await verifyAdmin(request))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const duck = await getDuckById(params.id);
+    const { id } = await params;
+    const duck = await getDuckById(id);
     if (!duck) {
       return NextResponse.json({ error: 'Duck not found' }, { status: 404 });
     }
-    await deleteDuck(params.id);
+    await deleteDuck(id);
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('DELETE /api/ducks/[id] error:', err);

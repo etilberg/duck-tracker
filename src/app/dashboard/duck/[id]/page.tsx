@@ -8,11 +8,12 @@ import DuckDetailClient from './DuckDetailClient';
 export default async function DuckDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   await requireAdmin();
 
-  const duck = await getDuckById(params.id);
+  const { id } = await params;
+  const duck = await getDuckById(id);
   if (!duck) notFound();
 
   const sightings = await getSightings(duck.id);
