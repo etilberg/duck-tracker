@@ -2,8 +2,10 @@ export const runtime = 'edge';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createSession } from '@/lib/session';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export async function GET(request: NextRequest) {
+  const { env } = getRequestContext();
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('code');
   const state = searchParams.get('state');
@@ -25,8 +27,8 @@ export async function GET(request: NextRequest) {
         Accept: 'application/json',
       },
       body: JSON.stringify({
-        client_id: process.env.GITHUB_CLIENT_ID,
-        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        client_id: env.GITHUB_CLIENT_ID,
+        client_secret: env.GITHUB_CLIENT_SECRET,
         code,
         redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`,
       }),
@@ -51,7 +53,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if this is the admin user
-    const adminUsername = process.env.ADMIN_GITHUB_USERNAME;
+    const adminUsername = env.ADMIN_GITHUB_USERNAME;
     if (!adminUsername || user.login !== adminUsername) {
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_APP_URL}/login?error=unauthorized`

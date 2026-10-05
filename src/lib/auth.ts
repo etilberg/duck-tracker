@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 import { getSession } from './session';
 
 export async function requireAdmin(): Promise<string> {
@@ -15,7 +16,8 @@ export async function requireAdmin(): Promise<string> {
     redirect('/login');
   }
 
-  const adminUsername = process.env.ADMIN_GITHUB_USERNAME;
+  const { env } = getRequestContext();
+  const adminUsername = env.ADMIN_GITHUB_USERNAME;
   if (!adminUsername || session.username !== adminUsername) {
     redirect('/login');
   }
@@ -32,7 +34,8 @@ export async function getAdminSession(): Promise<string | null> {
     const session = await getSession(sessionId);
     if (!session) return null;
 
-    const adminUsername = process.env.ADMIN_GITHUB_USERNAME;
+    const { env } = getRequestContext();
+    const adminUsername = env.ADMIN_GITHUB_USERNAME;
     if (!adminUsername || session.username !== adminUsername) return null;
 
     return session.username;
