@@ -1,7 +1,6 @@
 import { Resend } from 'resend';
 import type { Duck, Sighting } from './db';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://duck-tracker.pages.dev';
 
 export async function notifyPreviousFinders(
@@ -10,6 +9,13 @@ export async function notifyPreviousFinders(
   newSighting: Sighting
 ): Promise<void> {
   if (emails.length === 0) return;
+
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn('RESEND_API_KEY not set — skipping email notifications');
+    return;
+  }
+  const resend = new Resend(apiKey);
 
   const duckUrl = `${APP_URL}/duck/${duck.slug}`;
   const locationText = newSighting.location_label
