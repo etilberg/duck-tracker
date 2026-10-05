@@ -1,0 +1,16 @@
+name = "duck-tracker"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "duck-tracker"
+database_id = "b0712344-a6c8-4e3d-ba8d-b121487ec936"
+
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "95d59c06082b4bba990f134cfc71cd6a"
+
+[vars]
+NEXT_PUBLIC_APP_URL = "https://duck-tracker.pages.dev"
