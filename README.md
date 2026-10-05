@@ -2,7 +2,7 @@
 
 A "Where's George" style tracker for Jeep rubber ducks. Put a QR code on a duck, hand it to someone, and watch it travel the world.
 
-## Features
+## Features 
 
 - Unique QR code per duck → links to its public tracking page
 - Finders scan QR → see travel history on a map → click "I Found It!"
