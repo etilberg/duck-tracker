@@ -20,7 +20,9 @@
 
 const DUCK_SVG = [
   // explicit width/height so browsers report non-zero naturalWidth/naturalHeight
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 14" width="40" height="35">',
+  // shape-rendering="crispEdges" prevents SVG antialiasing on pixel art edges
+  // 32×28 = exactly 2× the 16×14 grid → every rect maps to whole display pixels
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 14" width="32" height="28" shape-rendering="crispEdges">',
   // white background (needed for eye cutout to show)
   '<rect width="16" height="14" fill="white"/>',
   // row 0 — head tuft
@@ -65,7 +67,7 @@ export const DUCK_QR_URI = `data:image/svg+xml;base64,${btoa(DUCK_SVG)}`;
 // excavate:true punches a white hole so the duck sits on a clean background.
 export const DUCK_IMAGE_SETTINGS = {
   src: DUCK_QR_URI,
-  width: 40,
-  height: 35,
+  width: 32,
+  height: 28,
   excavate: true,
 } as const;
