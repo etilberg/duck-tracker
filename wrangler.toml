@@ -13,5 +13,5 @@ binding = "SESSIONS"
 id = "95d59c06082b4bba990f134cfc71cd6a"
 
 [vars]
-NEXT_PUBLIC_APP_URL = "https://duck-tracker.pages.dev"
+NEXT_PUBLIC_APP_URL = "https://quackertracks.com"
 ADMIN_GITHUB_USERNAME = "etilberg"
