@@ -107,22 +107,24 @@ export default function DashboardClient({ initialDucks }: Props) {
     const outW = qrCanvas.width * scale;
     const outH = qrCanvas.height * scale;
 
-    const label = 'Track this duck!';
+    const lines = ['Track', 'this', 'duck!'];
     const gapAboveText = Math.round(outW * 0.03);
     const paddingBelow = Math.round(outW * 0.03);
 
-    // Binary-search the largest font that fits within the QR width
+    // Largest font where the widest word still fits the QR width
     const sidePad = Math.round(outW * 0.02);
     const maxTextW = outW - sidePad * 2;
+    const widest = lines.reduce((a, b) => (a.length >= b.length ? a : b));
     let fontSize = 10;
     for (let size = 10; size <= outW; size += 2) {
       const testCtx = document.createElement('canvas').getContext('2d')!;
       testCtx.font = `bold ${size}px sans-serif`;
-      if (testCtx.measureText(label).width > maxTextW) break;
+      if (testCtx.measureText(widest).width > maxTextW) break;
       fontSize = size;
     }
 
-    const textAreaHeight = Math.round(fontSize * 1.2) + gapAboveText + paddingBelow;
+    const lineH = Math.round(fontSize * 1.15);
+    const textAreaHeight = lines.length * lineH + gapAboveText + paddingBelow;
 
     const composite = document.createElement('canvas');
     composite.width = outW;
@@ -140,7 +142,9 @@ export default function DashboardClient({ initialDucks }: Props) {
     ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText(label, outW / 2, outH + gapAboveText);
+    lines.forEach((line, i) => {
+      ctx.fillText(line, outW / 2, outH + gapAboveText + i * lineH);
+    });
 
     const a = document.createElement('a');
     a.href = composite.toDataURL('image/png');
