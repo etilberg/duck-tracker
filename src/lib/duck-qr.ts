@@ -2,7 +2,8 @@
 // Facing right: yellow body, orange beak, black eye.
 // viewBox is 10×8 so the beak can stick out past the head without clipping.
 const DUCK_SVG = [
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 8">',
+  // explicit width/height required so naturalWidth/naturalHeight are non-zero when used as <img>
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 8" width="30" height="24">',
   // head top
   '<rect x="3" y="0" width="3" height="1" fill="#FCD34D"/>',
   // head mid
@@ -22,7 +23,8 @@ const DUCK_SVG = [
   '</svg>',
 ].join('');
 
-export const DUCK_QR_URI = `data:image/svg+xml,${encodeURIComponent(DUCK_SVG)}`;
+// base64 is more universally supported than URL-encoded SVG when used as <img src>
+export const DUCK_QR_URI = `data:image/svg+xml;base64,${btoa(DUCK_SVG)}`;
 
 // imageSettings to pass to <QRCodeCanvas>
 // Width:height = 10:8 matches the SVG aspect ratio.
