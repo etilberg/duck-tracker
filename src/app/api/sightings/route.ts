@@ -35,16 +35,13 @@ export async function POST(request: NextRequest) {
       email: body.email ?? null,
     });
 
-    // Send email notifications in the background (fire and forget)
-    const emailsPromise = getPreviousFinderEmailsWithIds(duck.id, sighting.id)
-      .then(finders => notifyPreviousFinders(finders, duck, sighting))
-      .catch(err => console.error('Email notification error:', err));
-
-    // Use waitUntil if available (Cloudflare edge)
+    // Send email notifications — await so they can't be cut off before the worker exits
     try {
-      const ctx = (globalThis as unknown as { __cf_ctx?: { waitUntil: (p: Promise<unknown>) => void } }).__cf_ctx;
-      ctx?.waitUntil(emailsPromise);
-    } catch { /* best-effort */ }
+      const finders = await getPreviousFinderEmailsWithIds(duck.id, sighting.id);
+      await notifyPreviousFinders(finders, duck, sighting);
+    } catch (err) {
+      console.error('Email notification error:', err);
+    }
 
     return NextResponse.json({ sighting }, { status: 201 });
   } catch (err) {
