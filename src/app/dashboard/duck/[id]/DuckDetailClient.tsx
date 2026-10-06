@@ -56,7 +56,7 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(qrCanvas, 0, 0, outW, outH);
 
-    ctx.fillStyle = '#92400e';
+    ctx.fillStyle = '#000000';
     ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
