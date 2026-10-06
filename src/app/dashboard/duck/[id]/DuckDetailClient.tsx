@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import Link from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
 import dynamic from 'next/dynamic';
+import { DUCK_IMAGE_SETTINGS } from '@/lib/duck-qr';
 import type { Duck, Sighting } from '@/lib/db';
 
 const DuckMap = dynamic(() => import('@/components/DuckMap'), { ssr: false });
@@ -102,6 +103,7 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
                 value={duckUrl}
                 size={140}
                 includeMargin
+                imageSettings={DUCK_IMAGE_SETTINGS}
               />
             </div>
             <button

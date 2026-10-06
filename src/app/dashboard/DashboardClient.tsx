@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
+import { DUCK_IMAGE_SETTINGS } from '@/lib/duck-qr';
 import type { Duck } from '@/lib/db';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://duck-tracker.pages.dev';
@@ -243,6 +244,7 @@ export default function DashboardClient({ initialDucks }: Props) {
                         value={duckUrl}
                         size={160}
                         includeMargin
+                        imageSettings={DUCK_IMAGE_SETTINGS}
                       />
                       <p className="text-xs text-yellow-700 font-semibold tracking-wide text-center mt-1">
                         🦆 Track this duck! Scan to log a sighting
