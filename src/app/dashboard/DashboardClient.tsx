@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
-import { DUCK_IMAGE_SETTINGS } from '@/lib/duck-qr';
+import { DUCK_IMAGE_SETTINGS, DUCK_IMAGE_SETTINGS_LARGE } from '@/lib/duck-qr';
 import type { Duck, DuckWithCount } from '@/lib/db';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://duck-tracker.pages.dev';
@@ -19,6 +19,7 @@ export default function DashboardClient({ initialDucks }: Props) {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
   const qrWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const downloadQrRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // Edit modal state
   const [editingDuck, setEditingDuck] = useState<Duck | null>(null);
@@ -100,20 +101,19 @@ export default function DashboardClient({ initialDucks }: Props) {
   }
 
   function downloadQR(duck: Duck) {
-    const wrapper = qrWrapperRefs.current[duck.id];
+    // Use the hidden high-res (400px) canvas — no scaling needed, so no gray
+    // antialiasing artifacts on QR module edges.
+    const wrapper = downloadQrRefs.current[duck.id];
     const qrCanvas = wrapper?.querySelector('canvas');
     if (!qrCanvas) return;
 
-    // Scale up so the output PNG is at least 600 px wide regardless of
-    // screen DPR.  Nearest-neighbor keeps QR modules and duck pixel art crisp.
-    const scale = Math.max(1, Math.ceil(600 / qrCanvas.width));
-    const outW = qrCanvas.width * scale;
-    const outH = qrCanvas.height * scale;
+    const outW = qrCanvas.width;
+    const outH = qrCanvas.height;
 
-    const lineHeight = 18 * scale;
+    const lineHeight = 28;
     const textLines = ['🦆 Track this duck!', 'Scan to log a sighting'];
-    const gapAboveText = 8 * scale;
-    const paddingBelow = 10 * scale;
+    const gapAboveText = 12;
+    const paddingBelow = 14;
     const textAreaHeight = textLines.length * lineHeight + gapAboveText + paddingBelow;
 
     const composite = document.createElement('canvas');
@@ -125,13 +125,10 @@ export default function DashboardClient({ initialDucks }: Props) {
 
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, composite.width, composite.height);
-
-    // Nearest-neighbor upscale → crisp QR modules and duck pixel art
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(qrCanvas, 0, 0, outW, outH);
+    ctx.drawImage(qrCanvas, 0, 0);
 
     ctx.fillStyle = '#92400e';
-    ctx.font = `bold ${13 * scale}px sans-serif`;
+    ctx.font = 'bold 20px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     const textX = composite.width / 2;
@@ -264,6 +261,20 @@ export default function DashboardClient({ initialDucks }: Props) {
                       <p className="text-xs text-yellow-700 font-semibold tracking-wide text-center mt-1">
                         🦆 Track this duck! Scan to log a sighting
                       </p>
+                    </div>
+
+                    {/* Hidden high-res canvas used only for downloads (no scaling = no gray artifacts) */}
+                    <div
+                      ref={el => { downloadQrRefs.current[duck.id] = el; }}
+                      style={{ position: 'absolute', left: '-9999px', top: '-9999px', pointerEvents: 'none' }}
+                      aria-hidden="true"
+                    >
+                      <QRCodeCanvas
+                        value={duckUrl}
+                        size={400}
+                        includeMargin
+                        imageSettings={DUCK_IMAGE_SETTINGS_LARGE}
+                      />
                     </div>
 
                     <div className="flex gap-2">
