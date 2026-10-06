@@ -107,10 +107,10 @@ export default function DashboardClient({ initialDucks }: Props) {
     const outW = qrCanvas.width * scale;
     const outH = qrCanvas.height * scale;
 
-    const lineHeight = 28;
+    const lineHeight = 28 * scale;
     const textLines = ['🦆 Track this duck!', 'Scan to log a sighting'];
-    const gapAboveText = 12;
-    const paddingBelow = 14;
+    const gapAboveText = 12 * scale;
+    const paddingBelow = 14 * scale;
     const textAreaHeight = textLines.length * lineHeight + gapAboveText + paddingBelow;
 
     const composite = document.createElement('canvas');
@@ -126,7 +126,7 @@ export default function DashboardClient({ initialDucks }: Props) {
     ctx.drawImage(qrCanvas, 0, 0, outW, outH);
 
     ctx.fillStyle = '#92400e';
-    ctx.font = 'bold 20px sans-serif';
+    ctx.font = `bold ${20 * scale}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     const textX = composite.width / 2;
