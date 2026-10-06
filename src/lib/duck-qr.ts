@@ -1,63 +1,34 @@
-// Pixel-art rubber duck SVG for the QR code center overlay.
-// 16×14 grid, facing left — black silhouette with white eye.
-// Designed for legibility at small sizes and thermal-printer output.
+// Rubber duck SVG for the QR code center overlay.
+// Outline style (white fill + black stroke) so it reads as a duck silhouette
+// rather than a filled blob at small display sizes.
 //
-// Grid (. = empty, # = black, W = white eye):
-//   .....####.......  row 0  head tuft
-//   ....#######.....  row 1  head
-//   ...#########....  row 2  head wide
-//   .####WW#####....  row 3  beak + eye + head
-//   ##..########.##.  row 4  beak tip + body top + tail
-//   #...#########.##  row 5  beak end + body + tail
-//   ...############.  row 6  body
-//   ..#############.  row 7  body
-//   ..#############.  row 8  body
-//   ..############..  row 9  body
-//   ...###########..  row 10 body
-//   ....##########..  row 11 body
-//   .....########...  row 12 body lower
-//   ......######....  row 13 bottom
+// Layout in a 44×36 viewBox:
+//   - Body:  landscape ellipse, lower-right
+//   - Head:  circle overlapping body upper-left
+//   - Neck cover: white ellipse to hide the stroke intersection
+//   - Beak:  small filled triangle pointing left
+//   - Eye:   small filled circle
+//   - Tail:  small curved bump at the right of the body
+//
+// Natural size 176×144 so the browser rasterizes from a large crisp image
+// and downscales into the 32×26 draw target — downscaling from a sharp
+// original is far cleaner than upscaling a small one.
 
 const DUCK_SVG = [
-  // Large natural size so the browser rasterizes at 160×140 (10× grid) then
-  // downscales to the 32×28 draw target — downscaling looks far crisper than
-  // upscaling a small image.  shape-rendering="crispEdges" keeps edges hard
-  // during the SVG→bitmap pass so the downscale starts from a sharp original.
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 14" width="160" height="140" shape-rendering="crispEdges">',
-  // white background (needed for eye cutout to show)
-  '<rect width="16" height="14" fill="white"/>',
-  // row 0 — head tuft
-  '<rect x="5" y="0" width="4" height="1" fill="black"/>',
-  // row 1 — head
-  '<rect x="4" y="1" width="7" height="1" fill="black"/>',
-  // row 2 — head wide
-  '<rect x="3" y="2" width="9" height="1" fill="black"/>',
-  // row 3 — full span black first, then punch out white eye
-  '<rect x="1" y="3" width="11" height="1" fill="black"/>',
-  // row 4 — beak (0-1), head/body (4-11), tail (13-14)
-  '<rect x="0" y="4" width="2" height="1" fill="black"/>',
-  '<rect x="4" y="4" width="8" height="1" fill="black"/>',
-  '<rect x="13" y="4" width="2" height="1" fill="black"/>',
-  // row 5 — beak tip (0), body (4-12), tail (14-15)
-  '<rect x="0" y="5" width="1" height="1" fill="black"/>',
-  '<rect x="4" y="5" width="9" height="1" fill="black"/>',
-  '<rect x="14" y="5" width="2" height="1" fill="black"/>',
-  // row 6 — body (3-15)
-  '<rect x="3" y="6" width="13" height="1" fill="black"/>',
-  // rows 7-8 — body widest (2-14)
-  '<rect x="2" y="7" width="13" height="2" fill="black"/>',
-  // row 9 — body (2-13)
-  '<rect x="2" y="9" width="12" height="1" fill="black"/>',
-  // row 10 — body (3-13)
-  '<rect x="3" y="10" width="11" height="1" fill="black"/>',
-  // row 11 — body (4-13)
-  '<rect x="4" y="11" width="10" height="1" fill="black"/>',
-  // row 12 — body (5-12)
-  '<rect x="5" y="12" width="8" height="1" fill="black"/>',
-  // row 13 — bottom (6-11)
-  '<rect x="6" y="13" width="6" height="1" fill="black"/>',
-  // eye — white on top of the black from row 3
-  '<rect x="5" y="3" width="2" height="1" fill="white"/>',
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 36" width="176" height="144">',
+  '<rect width="44" height="36" fill="white"/>',
+  // Body — large landscape ellipse
+  '<ellipse cx="27" cy="26" rx="14" ry="9" fill="white" stroke="black" stroke-width="2.5"/>',
+  // Neck cover — white, no stroke, hides the crossing strokes where head meets body
+  '<ellipse cx="21" cy="23" rx="6" ry="8" fill="white"/>',
+  // Head — circle sitting above and slightly left of body
+  '<circle cx="18" cy="16" r="9" fill="white" stroke="black" stroke-width="2.5"/>',
+  // Beak — small filled triangle pointing left
+  '<polygon points="9,14 3,16.5 9,19" fill="black"/>',
+  // Eye — filled circle, upper-left quadrant of head
+  '<circle cx="14" cy="13" r="2" fill="black"/>',
+  // Tail — small curved bump on the upper-right of the body
+  '<path d="M 39 18 C 42 16 44 12 42 10 C 40 13 38 12 39 18 Z" fill="black"/>',
   '</svg>',
 ].join('');
 
@@ -66,9 +37,10 @@ export const DUCK_QR_URI = `data:image/svg+xml;base64,${btoa(DUCK_SVG)}`;
 
 // imageSettings to pass to <QRCodeCanvas>.
 // excavate:true punches a white hole so the duck sits on a clean background.
+// 32×26 keeps the aspect ratio of the 44×36 viewBox (≈1.22:1).
 export const DUCK_IMAGE_SETTINGS = {
   src: DUCK_QR_URI,
   width: 32,
-  height: 28,
+  height: 26,
   excavate: true,
 } as const;

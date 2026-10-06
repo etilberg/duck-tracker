@@ -26,11 +26,27 @@ export function getDB() {
   return env.DB as D1Database;
 }
 
+export interface DuckWithCount extends Duck {
+  sighting_count: number;
+}
+
 export async function getDucks(): Promise<Duck[]> {
   const db = getDB();
   const result = await db.prepare(
     'SELECT * FROM ducks ORDER BY created_at DESC'
   ).all<Duck>();
+  return result.results;
+}
+
+export async function getDucksWithSightingCount(): Promise<DuckWithCount[]> {
+  const db = getDB();
+  const result = await db.prepare(
+    `SELECT d.*, COUNT(s.id) AS sighting_count
+     FROM ducks d
+     LEFT JOIN sightings s ON s.duck_id = d.id
+     GROUP BY d.id
+     ORDER BY d.created_at DESC`
+  ).all<DuckWithCount>();
   return result.results;
 }
 

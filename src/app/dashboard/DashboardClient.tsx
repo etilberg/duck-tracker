@@ -4,16 +4,16 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
 import { DUCK_IMAGE_SETTINGS } from '@/lib/duck-qr';
-import type { Duck } from '@/lib/db';
+import type { Duck, DuckWithCount } from '@/lib/db';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://duck-tracker.pages.dev';
 
 interface Props {
-  initialDucks: Duck[];
+  initialDucks: DuckWithCount[];
 }
 
 export default function DashboardClient({ initialDucks }: Props) {
-  const [ducks, setDucks] = useState<Duck[]>(initialDucks);
+  const [ducks, setDucks] = useState<DuckWithCount[]>(initialDucks);
   const [newName, setNewName] = useState('');
   const [newNotes, setNewNotes] = useState('');
   const [creating, setCreating] = useState(false);
@@ -38,9 +38,11 @@ export default function DashboardClient({ initialDucks }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newName.trim(), notes: newNotes.trim() || undefined }),
       });
-      const data = await res.json() as { duck?: Duck; error?: string };
+      const data = await res.json() as { duck?: DuckWithCount; error?: string };
       if (!res.ok || !data.duck) throw new Error(data.error || 'Failed to create duck');
-      setDucks(prev => [data.duck!, ...prev]);
+      // New duck has 0 sightings; API may not return sighting_count so default it
+      const newDuck: DuckWithCount = { ...data.duck!, sighting_count: (data.duck as DuckWithCount).sighting_count ?? 0 };
+      setDucks(prev => [newDuck, ...prev]);
       setNewName('');
       setNewNotes('');
     } catch (err) {
@@ -83,9 +85,12 @@ export default function DashboardClient({ initialDucks }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: editName.trim(), notes: editNotes.trim() || null }),
       });
-      const data = await res.json() as { duck?: Duck; error?: string };
+      const data = await res.json() as { duck?: DuckWithCount; error?: string };
       if (!res.ok || !data.duck) throw new Error(data.error || 'Failed to save');
-      setDucks(prev => prev.map(d => d.id === data.duck!.id ? data.duck! : d));
+      // Preserve sighting_count from local state since PATCH doesn't return it
+      setDucks(prev => prev.map(d =>
+        d.id === data.duck!.id ? { ...data.duck!, sighting_count: d.sighting_count } : d
+      ));
       closeEdit();
     } catch (err) {
       setEditError(err instanceof Error ? err.message : 'Something went wrong');
@@ -216,7 +221,12 @@ export default function DashboardClient({ initialDucks }: Props) {
                   <div key={duck.id} className="bg-white rounded-xl shadow p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-800 truncate">{duck.name}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-gray-800 truncate">{duck.name}</h3>
+                          <span className="shrink-0 text-xs font-semibold bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded-full">
+                            {duck.sighting_count} {duck.sighting_count === 1 ? 'sighting' : 'sightings'}
+                          </span>
+                        </div>
                         {duck.notes && (
                           <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">{duck.notes}</p>
                         )}
