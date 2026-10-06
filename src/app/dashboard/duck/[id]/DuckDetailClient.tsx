@@ -23,11 +23,15 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
     const qrCanvas = qrWrapperRef.current?.querySelector('canvas');
     if (!qrCanvas) return;
 
-    const padding = 12;
-    const textHeight = 36;
+    const lineHeight = 15;
+    const textLines = ['🦆 Track this duck!', 'Scan to log a sighting'];
+    const gapAboveText = 6;
+    const paddingBelow = 8;
+    const textAreaHeight = textLines.length * lineHeight + gapAboveText + paddingBelow;
+
     const composite = document.createElement('canvas');
-    composite.width = qrCanvas.width + padding * 2;
-    composite.height = qrCanvas.height + textHeight + padding;
+    composite.width = qrCanvas.width;
+    composite.height = qrCanvas.height + textAreaHeight;
 
     const ctx = composite.getContext('2d');
     if (!ctx) return;
@@ -36,15 +40,18 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, composite.width, composite.height);
 
-    // QR code centered horizontally
-    ctx.drawImage(qrCanvas, padding, 0);
+    // QR code flush to top
+    ctx.drawImage(qrCanvas, 0, 0);
 
-    // Callout text below
-    ctx.fillStyle = '#92400e'; // yellow-800 equivalent
-    ctx.font = 'bold 13px sans-serif';
+    // Two-line callout text, centered within QR width
+    ctx.fillStyle = '#92400e';
+    ctx.font = 'bold 11px sans-serif';
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('🦆 Track this duck! Scan to log a sighting', composite.width / 2, qrCanvas.height + padding + textHeight / 2);
+    ctx.textBaseline = 'top';
+    const textX = composite.width / 2;
+    textLines.forEach((line, i) => {
+      ctx.fillText(line, textX, qrCanvas.height + gapAboveText + i * lineHeight);
+    });
 
     const a = document.createElement('a');
     a.href = composite.toDataURL('image/png');
