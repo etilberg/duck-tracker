@@ -27,12 +27,22 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
     const outW = qrCanvas.width * scale;
     const outH = qrCanvas.height * scale;
 
-    const textLines = ['🦆 Track this duck!', 'Scan to log a sighting'];
-    // Reserve a text strip — will be sized precisely after font is measured below
-    const estLineH = Math.round(outW / 10);
-    const gapAboveText = Math.round(outW * 0.02);
-    const paddingBelow = Math.round(outW * 0.025);
-    const textAreaHeight = textLines.length * estLineH + gapAboveText + paddingBelow;
+    const label = 'Track this duck!';
+    const gapAboveText = Math.round(outW * 0.03);
+    const paddingBelow = Math.round(outW * 0.03);
+
+    // Binary-search the largest font that fits within the QR width
+    const sidePad = Math.round(outW * 0.02);
+    const maxTextW = outW - sidePad * 2;
+    let fontSize = 10;
+    for (let size = 10; size <= outW; size += 2) {
+      const testCtx = document.createElement('canvas').getContext('2d')!;
+      testCtx.font = `bold ${size}px sans-serif`;
+      if (testCtx.measureText(label).width > maxTextW) break;
+      fontSize = size;
+    }
+
+    const textAreaHeight = Math.round(fontSize * 1.2) + gapAboveText + paddingBelow;
 
     const composite = document.createElement('canvas');
     composite.width = outW;
@@ -46,26 +56,11 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(qrCanvas, 0, 0, outW, outH);
 
-    // Auto-fit font so the longest line is no wider than the QR code
-    const sidePad = Math.round(outW * 0.04);
-    const maxTextW = outW - sidePad * 2;
-    let fontSize = Math.round(outW / 12);
-    ctx.font = `bold ${fontSize}px sans-serif`;
-    const longest = textLines.reduce((a, b) =>
-      ctx.measureText(a).width >= ctx.measureText(b).width ? a : b
-    );
-    const measured = ctx.measureText(longest).width;
-    if (measured > maxTextW) fontSize = Math.floor(fontSize * maxTextW / measured);
-
     ctx.fillStyle = '#92400e';
     ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    const textX = composite.width / 2;
-    const fittedLineHeight = Math.round(fontSize * 1.35);
-    textLines.forEach((line, i) => {
-      ctx.fillText(line, textX, outH + gapAboveText + i * fittedLineHeight);
-    });
+    ctx.fillText(label, outW / 2, outH + gapAboveText);
 
     const a = document.createElement('a');
     a.href = composite.toDataURL('image/png');
