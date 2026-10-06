@@ -1,7 +1,7 @@
 export const runtime = 'edge';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getDuckBySlug, createSighting, getPreviousFinderEmails } from '@/lib/db';
+import { getDuckBySlug, createSighting, getPreviousFinderEmailsWithIds } from '@/lib/db';
 import { notifyPreviousFinders } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
@@ -36,15 +36,15 @@ export async function POST(request: NextRequest) {
     });
 
     // Send email notifications in the background (fire and forget)
-    const emailsPromise = getPreviousFinderEmails(duck.id, sighting.id)
-      .then(emails => notifyPreviousFinders(emails, duck, sighting))
+    const emailsPromise = getPreviousFinderEmailsWithIds(duck.id, sighting.id)
+      .then(finders => notifyPreviousFinders(finders, duck, sighting))
       .catch(err => console.error('Email notification error:', err));
 
-    // Use waitUntil if available (Cloudflare Workers)
-    if (typeof globalThis !== 'undefined' && 'waitUntil' in globalThis) {
-      // @ts-ignore
-      globalThis.waitUntil(emailsPromise);
-    }
+    // Use waitUntil if available (Cloudflare edge)
+    try {
+      const ctx = (globalThis as unknown as { __cf_ctx?: { waitUntil: (p: Promise<unknown>) => void } }).__cf_ctx;
+      ctx?.waitUntil(emailsPromise);
+    } catch { /* best-effort */ }
 
     return NextResponse.json({ sighting }, { status: 201 });
   } catch (err) {

@@ -135,3 +135,27 @@ export async function getPreviousFinderEmails(duckId: string, excludeSightingId:
   ).bind(duckId, excludeSightingId).all<{ email: string }>();
   return result.results.map(r => r.email);
 }
+
+export interface FinderWithToken {
+  email: string;
+  sighting_id: string;
+}
+
+// Returns one row per unique email — picks the earliest sighting's ID as the unsubscribe token
+export async function getPreviousFinderEmailsWithIds(
+  duckId: string,
+  excludeSightingId: string
+): Promise<FinderWithToken[]> {
+  const db = getDB();
+  const result = await db.prepare(
+    `SELECT email, MIN(id) as sighting_id FROM sightings
+     WHERE duck_id = ? AND email IS NOT NULL AND email != '' AND id != ?
+     GROUP BY email`
+  ).bind(duckId, excludeSightingId).all<FinderWithToken>();
+  return result.results;
+}
+
+export async function clearSightingEmail(sightingId: string): Promise<void> {
+  const db = getDB();
+  await db.prepare('UPDATE sightings SET email = NULL WHERE id = ?').bind(sightingId).run();
+}

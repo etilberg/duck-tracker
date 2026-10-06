@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import type { Duck, Sighting } from '@/lib/db';
 
 const DuckMap = dynamic(() => import('@/components/DuckMap'), { ssr: false });
@@ -85,7 +86,7 @@ export default function FindDuckClient({ duck, initialSightings }: Props) {
   const sightingsWithCoords = sightings.filter(s => s.lat !== null && s.lng !== null);
 
   return (
-    <div className="min-h-screen bg-yellow-50">
+    <div className="min-h-screen bg-yellow-50 flex flex-col">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-2xl mx-auto px-4 py-4 text-center">
@@ -95,7 +96,7 @@ export default function FindDuckClient({ duck, initialSightings }: Props) {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6 flex-1">
         {/* Map */}
         {sightingsWithCoords.length > 0 && (
           <div className="bg-white rounded-xl shadow p-4">
@@ -130,8 +131,11 @@ export default function FindDuckClient({ duck, initialSightings }: Props) {
           <div className="bg-white rounded-xl shadow p-6 text-center">
             <div className="text-4xl mb-3">🎉</div>
             <h2 className="text-xl font-bold text-gray-800 mb-2">You found {duck.name}!</h2>
-            <p className="text-gray-600 mb-6">
-              Want to share your location? It helps track this duck's journey.
+            <p className="text-gray-600 mb-2">
+              Want to share your location? It helps track this duck's journey across the map.
+            </p>
+            <p className="text-xs text-gray-400 mb-6">
+              📍 Location is only used to pin the duck on the map — we're not tracking you, we promise.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
@@ -194,11 +198,12 @@ export default function FindDuckClient({ duck, initialSightings }: Props) {
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="Email for future notifications (optional)"
+                  placeholder="Email for future updates (optional)"
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 />
                 <p className="text-xs text-gray-400 mt-1">
-                  Get an email each time this duck is found again.
+                  ✉️ We'll ping you next time this duck gets spotted. No spam, no newsletters, no shenanigans —
+                  just duck updates. Every email includes an unsubscribe link.
                 </p>
               </div>
             </div>
@@ -223,8 +228,9 @@ export default function FindDuckClient({ duck, initialSightings }: Props) {
               {duck.name} has now been found {sightings.length} time{sightings.length !== 1 ? 's' : ''}.
             </p>
             {email && (
-              <p className="text-sm text-gray-500">
-                We'll email you at {email} when it's found again.
+              <p className="text-sm text-gray-500 mt-2">
+                We'll email {email} next time this duck turns up.
+                Every message has an unsubscribe link — no hard feelings if you bail. 🤝
               </p>
             )}
             <button
@@ -263,6 +269,26 @@ export default function FindDuckClient({ duck, initialSightings }: Props) {
           </div>
         )}
       </main>
+
+      {/* Footer links */}
+      <footer className="max-w-2xl mx-auto w-full px-4 py-6 text-center">
+        <p className="text-sm text-gray-400 mb-2">Have a duck of your own?</p>
+        <div className="flex justify-center gap-4 text-sm">
+          <Link
+            href="/browse"
+            className="text-yellow-600 hover:text-yellow-800 transition-colors"
+          >
+            🗺️ Browse all sightings
+          </Link>
+          <span className="text-gray-300">·</span>
+          <Link
+            href="/submit"
+            className="text-yellow-600 hover:text-yellow-800 transition-colors"
+          >
+            🦆 Submit your own duck
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 }
