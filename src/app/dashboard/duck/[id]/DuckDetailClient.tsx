@@ -20,11 +20,34 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
   const duckUrl = `${APP_URL}/duck/${duck.slug}`;
 
   function downloadQR() {
-    const canvas = qrWrapperRef.current?.querySelector('canvas');
-    if (!canvas) return;
-    const url = canvas.toDataURL('image/png');
+    const qrCanvas = qrWrapperRef.current?.querySelector('canvas');
+    if (!qrCanvas) return;
+
+    const padding = 12;
+    const textHeight = 36;
+    const composite = document.createElement('canvas');
+    composite.width = qrCanvas.width + padding * 2;
+    composite.height = qrCanvas.height + textHeight + padding;
+
+    const ctx = composite.getContext('2d');
+    if (!ctx) return;
+
+    // White background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, composite.width, composite.height);
+
+    // QR code centered horizontally
+    ctx.drawImage(qrCanvas, padding, 0);
+
+    // Callout text below
+    ctx.fillStyle = '#92400e'; // yellow-800 equivalent
+    ctx.font = 'bold 13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🦆 Track this duck! Scan to log a sighting', composite.width / 2, qrCanvas.height + padding + textHeight / 2);
+
     const a = document.createElement('a');
-    a.href = url;
+    a.href = composite.toDataURL('image/png');
     a.download = `duck-${duck.slug}.png`;
     a.click();
   }
