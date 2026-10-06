@@ -19,10 +19,11 @@
 //   ......######....  row 13 bottom
 
 const DUCK_SVG = [
-  // explicit width/height so browsers report non-zero naturalWidth/naturalHeight
-  // shape-rendering="crispEdges" prevents SVG antialiasing on pixel art edges
-  // 32×28 = exactly 2× the 16×14 grid → every rect maps to whole display pixels
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 14" width="32" height="28" shape-rendering="crispEdges">',
+  // Large natural size so the browser rasterizes at 160×140 (10× grid) then
+  // downscales to the 32×28 draw target — downscaling looks far crisper than
+  // upscaling a small image.  shape-rendering="crispEdges" keeps edges hard
+  // during the SVG→bitmap pass so the downscale starts from a sharp original.
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 14" width="160" height="140" shape-rendering="crispEdges">',
   // white background (needed for eye cutout to show)
   '<rect width="16" height="14" fill="white"/>',
   // row 0 — head tuft

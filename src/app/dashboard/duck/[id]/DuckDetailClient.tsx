@@ -24,34 +24,39 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
     const qrCanvas = qrWrapperRef.current?.querySelector('canvas');
     if (!qrCanvas) return;
 
-    const lineHeight = 15;
+    // Scale up so the output PNG is at least 600 px wide regardless of
+    // screen DPR.  Nearest-neighbor keeps QR modules and duck pixel art crisp.
+    const scale = Math.max(1, Math.ceil(600 / qrCanvas.width));
+    const outW = qrCanvas.width * scale;
+    const outH = qrCanvas.height * scale;
+
+    const lineHeight = 18 * scale;
     const textLines = ['🦆 Track this duck!', 'Scan to log a sighting'];
-    const gapAboveText = 6;
-    const paddingBelow = 8;
+    const gapAboveText = 8 * scale;
+    const paddingBelow = 10 * scale;
     const textAreaHeight = textLines.length * lineHeight + gapAboveText + paddingBelow;
 
     const composite = document.createElement('canvas');
-    composite.width = qrCanvas.width;
-    composite.height = qrCanvas.height + textAreaHeight;
+    composite.width = outW;
+    composite.height = outH + textAreaHeight;
 
     const ctx = composite.getContext('2d');
     if (!ctx) return;
 
-    // White background
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, composite.width, composite.height);
 
-    // QR code flush to top
-    ctx.drawImage(qrCanvas, 0, 0);
+    // Nearest-neighbor upscale → crisp QR modules and duck pixel art
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(qrCanvas, 0, 0, outW, outH);
 
-    // Two-line callout text, centered within QR width
     ctx.fillStyle = '#92400e';
-    ctx.font = 'bold 11px sans-serif';
+    ctx.font = `bold ${13 * scale}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     const textX = composite.width / 2;
     textLines.forEach((line, i) => {
-      ctx.fillText(line, textX, qrCanvas.height + gapAboveText + i * lineHeight);
+      ctx.fillText(line, textX, outH + gapAboveText + i * lineHeight);
     });
 
     const a = document.createElement('a');
