@@ -1,6 +1,7 @@
 export const runtime = 'edge';
 
 import { NextRequest, NextResponse } from 'next/server';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 import { getSession } from '@/lib/session';
 import { getDucks, createDuck } from '@/lib/db';
 import { generateSlug } from '@/lib/qr';
@@ -10,7 +11,8 @@ async function verifyAdmin(request: NextRequest): Promise<boolean> {
   if (!sessionId) return false;
   const session = await getSession(sessionId);
   if (!session) return false;
-  const adminUsername = process.env.ADMIN_GITHUB_USERNAME;
+  const { env } = getRequestContext();
+  const adminUsername = env.ADMIN_GITHUB_USERNAME;
   return !!adminUsername && session.username === adminUsername;
 }
 

@@ -101,6 +101,32 @@ export async function createSighting(data: {
   return result;
 }
 
+export async function updateDuck(id: string, name: string, notes?: string | null): Promise<Duck> {
+  const db = getDB();
+  const result = await db.prepare(
+    'UPDATE ducks SET name = ?, notes = ? WHERE id = ? RETURNING *'
+  ).bind(name, notes ?? null, id).first<Duck>();
+  if (!result) throw new Error('Duck not found');
+  return result;
+}
+
+export interface SightingWithDuck extends Sighting {
+  duck_name: string;
+  duck_slug: string;
+}
+
+export async function getAllSightingsWithDuck(): Promise<SightingWithDuck[]> {
+  const db = getDB();
+  const result = await db.prepare(
+    `SELECT s.*, d.name as duck_name, d.slug as duck_slug
+     FROM sightings s
+     JOIN ducks d ON s.duck_id = d.id
+     WHERE s.lat IS NOT NULL AND s.lng IS NOT NULL
+     ORDER BY s.found_at DESC`
+  ).all<SightingWithDuck>();
+  return result.results;
+}
+
 export async function getPreviousFinderEmails(duckId: string, excludeSightingId: string): Promise<string[]> {
   const db = getDB();
   const result = await db.prepare(

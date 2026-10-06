@@ -19,6 +19,13 @@ export default function DashboardClient({ initialDucks }: Props) {
   const [error, setError] = useState('');
   const qrWrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // Edit modal state
+  const [editingDuck, setEditingDuck] = useState<Duck | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editNotes, setEditNotes] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState('');
+
   async function createDuck() {
     if (!newName.trim()) return;
     setCreating(true);
@@ -48,8 +55,41 @@ export default function DashboardClient({ initialDucks }: Props) {
       const res = await fetch(`/api/ducks/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Delete failed');
       setDucks(prev => prev.filter(d => d.id !== id));
-    } catch (err) {
+    } catch {
       alert('Failed to delete duck');
+    }
+  }
+
+  function openEdit(duck: Duck) {
+    setEditingDuck(duck);
+    setEditName(duck.name);
+    setEditNotes(duck.notes ?? '');
+    setEditError('');
+  }
+
+  function closeEdit() {
+    setEditingDuck(null);
+    setEditError('');
+  }
+
+  async function saveEdit() {
+    if (!editingDuck || !editName.trim()) return;
+    setSaving(true);
+    setEditError('');
+    try {
+      const res = await fetch(`/api/ducks/${editingDuck.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editName.trim(), notes: editNotes.trim() || null }),
+      });
+      const data = await res.json() as { duck?: Duck; error?: string };
+      if (!res.ok || !data.duck) throw new Error(data.error || 'Failed to save');
+      setDucks(prev => prev.map(d => d.id === data.duck!.id ? data.duck! : d));
+      closeEdit();
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -72,12 +112,20 @@ export default function DashboardClient({ initialDucks }: Props) {
             <span className="text-3xl">🦆</span>
             <h1 className="text-xl font-bold text-gray-800">Duck Tracker Dashboard</h1>
           </div>
-          <a
-            href="/api/auth/logout"
-            className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
-          >
-            Sign out
-          </a>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/browse"
+              className="text-sm text-yellow-600 hover:text-yellow-800 transition-colors"
+            >
+              Browse map
+            </Link>
+            <a
+              href="/api/auth/logout"
+              className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+            >
+              Sign out
+            </a>
+          </div>
         </div>
       </header>
 
@@ -131,32 +179,44 @@ export default function DashboardClient({ initialDucks }: Props) {
                 return (
                   <div key={duck.id} className="bg-white rounded-xl shadow p-4">
                     <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold text-gray-800">{duck.name}</h3>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-800 truncate">{duck.name}</h3>
                         {duck.notes && (
-                          <p className="text-sm text-gray-500 mt-0.5">{duck.notes}</p>
+                          <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">{duck.notes}</p>
                         )}
                         <p className="text-xs text-gray-400 mt-1 font-mono">{duck.slug}</p>
                       </div>
-                      <button
-                        onClick={() => deleteDuck(duck.id)}
-                        className="text-gray-300 hover:text-red-500 transition-colors text-lg leading-none"
-                        title="Delete duck"
-                      >
-                        ×
-                      </button>
+                      <div className="flex gap-1 ml-2 shrink-0">
+                        <button
+                          onClick={() => openEdit(duck)}
+                          className="text-gray-300 hover:text-blue-500 transition-colors text-sm px-1"
+                          title="Edit duck"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => deleteDuck(duck.id)}
+                          className="text-gray-300 hover:text-red-500 transition-colors text-lg leading-none"
+                          title="Delete duck"
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
 
-                    {/* QR canvas for download */}
+                    {/* QR code with callout text */}
                     <div
                       ref={el => { qrWrapperRefs.current[duck.id] = el; }}
-                      className="flex justify-center mb-3"
+                      className="flex flex-col items-center mb-3"
                     >
                       <QRCodeCanvas
                         value={duckUrl}
                         size={160}
                         includeMargin
                       />
+                      <p className="text-xs text-yellow-700 font-semibold tracking-wide text-center mt-1">
+                        🦆 Track this duck! Scan to log a sighting
+                      </p>
                     </div>
 
                     <div className="flex gap-2">
@@ -180,6 +240,59 @@ export default function DashboardClient({ initialDucks }: Props) {
           )}
         </section>
       </main>
+
+      {/* Edit modal */}
+      {editingDuck && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4"
+          onClick={e => { if (e.target === e.currentTarget) closeEdit(); }}
+        >
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+            <h2 className="text-lg font-bold text-gray-800 mb-4">Edit Duck</h2>
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={e => setEditName(e.target.value)}
+                  maxLength={80}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Notes <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <textarea
+                  value={editNotes}
+                  onChange={e => setEditNotes(e.target.value)}
+                  maxLength={500}
+                  rows={3}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
+                />
+              </div>
+              {editError && <p className="text-red-600 text-sm">{editError}</p>}
+              <div className="flex gap-2 mt-1">
+                <button
+                  onClick={closeEdit}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveEdit}
+                  disabled={saving || !editName.trim()}
+                  className="flex-1 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-200 text-gray-900 font-medium py-2 rounded-lg transition-colors"
+                >
+                  {saving ? 'Saving…' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
