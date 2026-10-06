@@ -4,7 +4,6 @@ import { useRef } from 'react';
 import Link from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
 import dynamic from 'next/dynamic';
-import { DUCK_IMAGE_SETTINGS, DUCK_IMAGE_SETTINGS_LARGE } from '@/lib/duck-qr';
 import type { Duck, Sighting } from '@/lib/db';
 
 const DuckMap = dynamic(() => import('@/components/DuckMap'), { ssr: false });
@@ -18,17 +17,15 @@ interface Props {
 
 export default function DuckDetailClient({ duck, initialSightings }: Props) {
   const qrWrapperRef = useRef<HTMLDivElement | null>(null);
-  const downloadQrRef = useRef<HTMLDivElement | null>(null);
   const duckUrl = `${APP_URL}/duck/${duck.slug}`;
 
   function downloadQR() {
-    // Use the hidden high-res (400px) canvas — no scaling needed, so no gray
-    // antialiasing artifacts on QR module edges.
-    const qrCanvas = downloadQrRef.current?.querySelector('canvas');
+    const qrCanvas = qrWrapperRef.current?.querySelector('canvas');
     if (!qrCanvas) return;
 
-    const outW = qrCanvas.width;
-    const outH = qrCanvas.height;
+    const scale = Math.max(1, Math.ceil(600 / qrCanvas.width));
+    const outW = qrCanvas.width * scale;
+    const outH = qrCanvas.height * scale;
 
     const lineHeight = 28;
     const textLines = ['🦆 Track this duck!', 'Scan to log a sighting'];
@@ -45,7 +42,8 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
 
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, composite.width, composite.height);
-    ctx.drawImage(qrCanvas, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(qrCanvas, 0, 0, outW, outH);
 
     ctx.fillStyle = '#92400e';
     ctx.font = 'bold 20px sans-serif';
@@ -105,20 +103,6 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
                 value={duckUrl}
                 size={140}
                 includeMargin
-                imageSettings={DUCK_IMAGE_SETTINGS}
-              />
-            </div>
-            {/* Hidden high-res canvas for downloads (no scaling = no gray artifacts) */}
-            <div
-              ref={downloadQrRef}
-              style={{ position: 'absolute', left: '-9999px', top: '-9999px', pointerEvents: 'none' }}
-              aria-hidden="true"
-            >
-              <QRCodeCanvas
-                value={duckUrl}
-                size={400}
-                includeMargin
-                imageSettings={DUCK_IMAGE_SETTINGS_LARGE}
               />
             </div>
             <button
