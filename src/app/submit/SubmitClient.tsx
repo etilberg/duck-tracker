@@ -10,6 +10,9 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://duck-tracker.pages.d
 export default function SubmitClient() {
   const [name, setName] = useState('');
   const [notes, setNotes] = useState('');
+  const [originatorName, setOriginatorName] = useState('');
+  const [originatorLocation, setOriginatorLocation] = useState('');
+  const [originatorEmail, setOriginatorEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [createdDuck, setCreatedDuck] = useState<Duck | null>(null);
@@ -24,7 +27,13 @@ export default function SubmitClient() {
       const res = await fetch('/api/ducks/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), notes: notes.trim() || undefined }),
+        body: JSON.stringify({
+          name: name.trim(),
+          notes: notes.trim() || undefined,
+          originator_name: originatorName.trim() || undefined,
+          originator_location: originatorLocation.trim() || undefined,
+          originator_email: originatorEmail.trim() || undefined,
+        }),
       });
       const data = await res.json() as { duck?: Duck; error?: string };
       if (!res.ok || !data.duck) throw new Error(data.error || 'Failed to create duck');
@@ -59,6 +68,12 @@ export default function SubmitClient() {
             {duckUrl}
           </p>
 
+          {originatorEmail && (
+            <p className="text-xs text-gray-400 mb-4">
+              ✉️ We'll email you at <span className="font-medium">{originatorEmail}</span> each time it's found.
+            </p>
+          )}
+
           <div className="flex flex-col gap-2">
             <a
               href={duckUrl}
@@ -73,6 +88,9 @@ export default function SubmitClient() {
                 setCreatedDuck(null);
                 setName('');
                 setNotes('');
+                setOriginatorName('');
+                setOriginatorLocation('');
+                setOriginatorEmail('');
               }}
               className="text-sm text-gray-400 hover:text-gray-700 transition-colors py-1"
             >
@@ -89,7 +107,7 @@ export default function SubmitClient() {
   }
 
   return (
-    <div className="min-h-screen bg-yellow-50 flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-yellow-50 flex flex-col items-center justify-center px-4 py-10">
       <div className="bg-white rounded-2xl shadow-lg p-8 max-w-sm w-full">
         <div className="text-center mb-6">
           <div className="text-5xl mb-2">🦆</div>
@@ -99,36 +117,73 @@ export default function SubmitClient() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Duck name <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="e.g. Quackers, Sir Duckington…"
-              maxLength={80}
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-            />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          {/* Duck info */}
+          <div className="flex flex-col gap-3">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">About the Duck</h2>
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Duck name <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="e.g. Quackers, Sir Duckington…"
+                maxLength={80}
+                required
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              />
+            </div>
+            <div>
+              <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+                Duck's story <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+              <textarea
+                id="notes"
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder="Where did this duck come from? Any fun facts?"
+                maxLength={500}
+                rows={2}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
+              />
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-              Notes <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <textarea
-              id="notes"
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder="Where did you get this duck? Any fun facts?"
-              maxLength={500}
-              rows={3}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
+          {/* Originator info */}
+          <div className="flex flex-col gap-3">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">About You <span className="font-normal normal-case">(all optional)</span></h2>
+            <input
+              type="text"
+              value={originatorName}
+              onChange={e => setOriginatorName(e.target.value)}
+              placeholder="Your name"
+              maxLength={80}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
+            <input
+              type="text"
+              value={originatorLocation}
+              onChange={e => setOriginatorLocation(e.target.value)}
+              placeholder="Where are you releasing it? (city, event…)"
+              maxLength={200}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            />
+            <div>
+              <input
+                type="email"
+                value={originatorEmail}
+                onChange={e => setOriginatorEmail(e.target.value)}
+                placeholder="Email for sighting updates"
+                maxLength={200}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                ✉️ Get notified each time your duck is spotted. No spam ever — every email has an unsubscribe link.
+              </p>
+            </div>
           </div>
 
           {error && <p className="text-red-600 text-sm">{error}</p>}
