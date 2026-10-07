@@ -3,7 +3,7 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 import type { Duck, Sighting } from './db';
 import type { FinderWithToken } from './db';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://duck-tracker.pages.dev';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://quackertracks.com';
 
 export async function notifyPreviousFinders(
   finders: FinderWithToken[],

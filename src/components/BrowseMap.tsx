@@ -15,7 +15,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://duck-tracker.pages.dev';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://quackertracks.com';
 
 interface Props {
   sightings: SightingWithDuck[];

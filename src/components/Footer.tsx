@@ -16,10 +16,6 @@ const DUCK_PRODUCTS = [
     label: '50-Pack Assorted Jeep Ducking Ducks',
   },
   {
-    asin: 'B09KHJTW7R',
-    label: 'Swinging Duck Rearview Mirror Ornament',
-  },
-  {
     asin: 'B0DY7QK515',
     label: 'Paracord Duck Holder (holds 36 ducks!)',
   },

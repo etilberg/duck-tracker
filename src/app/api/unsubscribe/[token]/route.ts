@@ -3,7 +3,7 @@ export const runtime = 'edge';
 import { NextRequest, NextResponse } from 'next/server';
 import { clearSightingEmail } from '@/lib/db';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://duck-tracker.pages.dev';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://quackertracks.com';
 
 export async function GET(
   _request: NextRequest,
