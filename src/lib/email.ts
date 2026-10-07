@@ -62,10 +62,7 @@ export async function notifyPreviousFinders(
       `;
 
       return resend.emails.send({
-        // Using Resend's shared sender until a custom domain is verified.
-        // Once you verify a domain in Resend, change this to e.g.:
-        //   'Duck Tracker <noreply@yourdomain.com>'
-        from: 'Duck Tracker <onboarding@resend.dev>',
+        from: 'Duck Tracker <noreply@quackertracks.com>',
         to: email,
         subject: `🦆 ${duck.name} was found again!`,
         html,
