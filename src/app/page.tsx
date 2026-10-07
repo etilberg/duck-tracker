@@ -147,11 +147,23 @@ export default function HomePage() {
             No user data collected — ever. We wrote this whole app just to track tiny rubber animals, and we are
             completely at peace with that decision.
           </p>
-          <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-400">
-            {['🍪 No cookies', '👤 No accounts to browse', '📊 No ad trackers', '🕵️ No funny business'].map(item => (
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-400 mb-6">
+            {['👤 No accounts to browse', '📊 No ad trackers', '🕵️ No funny business'].map(item => (
               <span key={item} className="bg-gray-800 px-4 py-2 rounded-full">{item}</span>
             ))}
           </div>
+          <p className="text-gray-400 text-sm italic">
+            🍪 The only cookies around here are{' '}
+            <a
+              href="https://www.amazon.com/dp/B0F2PD6K5X/?tag=et0df-20"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-yellow-400 hover:text-yellow-300 underline underline-offset-2"
+            >
+              these ones from Amazon
+            </a>
+            .
+          </p>
         </div>
       </section>
 

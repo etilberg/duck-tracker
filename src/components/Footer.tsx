@@ -19,6 +19,14 @@ const DUCK_PRODUCTS = [
     asin: 'B0DY7QK515',
     label: 'Paracord Duck Holder (holds 36 ducks!)',
   },
+  {
+    asin: 'B0F2PD6K5X',
+    label: 'Rubber Duck Gummy Candies (the only cookies here) 🍪',
+  },
+  {
+    asin: 'B0DYKN5219',
+    label: 'Ducky Doo-Doo Marshmallows 💩',
+  },
 ];
 
 export default function Footer() {
