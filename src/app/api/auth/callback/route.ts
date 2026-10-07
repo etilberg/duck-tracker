@@ -10,12 +10,11 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const state = searchParams.get('state');
 
+  const origin = new URL(request.url).origin;
   const storedState = request.cookies.get('oauth_state')?.value;
 
   if (!code || !state || state !== storedState) {
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/login?error=invalid_state`
-    );
+    return NextResponse.redirect(`${origin}/login?error=invalid_state`);
   }
 
   try {
@@ -30,7 +29,7 @@ export async function GET(request: NextRequest) {
         client_id: env.GITHUB_CLIENT_ID,
         client_secret: env.GITHUB_CLIENT_SECRET,
         code,
-        redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`,
+        redirect_uri: `${origin}/api/auth/callback`,
       }),
     });
 
@@ -55,17 +54,13 @@ export async function GET(request: NextRequest) {
     // Check if this is the admin user
     const adminUsername = env.ADMIN_GITHUB_USERNAME;
     if (!adminUsername || user.login !== adminUsername) {
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/login?error=unauthorized`
-      );
+      return NextResponse.redirect(`${origin}/login?error=unauthorized`);
     }
 
     // Create session in KV
     const sessionId = await createSession(user.login);
 
-    const response = NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
-    );
+    const response = NextResponse.redirect(`${origin}/dashboard`);
 
     response.cookies.set('duck_session', sessionId, {
       httpOnly: true,
@@ -81,8 +76,6 @@ export async function GET(request: NextRequest) {
     return response;
   } catch (err) {
     console.error('OAuth callback error:', err);
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/login?error=oauth_failed`
-    );
+    return NextResponse.redirect(`${origin}/login?error=oauth_failed`);
   }
 }

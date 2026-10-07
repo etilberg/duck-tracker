@@ -3,19 +3,20 @@ export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import { getRequestContext } from '@cloudflare/next-on-pages';
 
-export async function GET() {
+export async function GET(request: Request) {
   const { env } = getRequestContext();
   const clientId = env.GITHUB_CLIENT_ID;
   if (!clientId) {
     return NextResponse.json({ error: 'GitHub OAuth not configured' }, { status: 500 });
   }
 
+  const origin = new URL(request.url).origin;
   const state = crypto.randomUUID();
   const params = new URLSearchParams({
     client_id: clientId,
     scope: 'read:user',
     state,
-    redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`,
+    redirect_uri: `${origin}/api/auth/callback`,
   });
 
   const response = NextResponse.redirect(
