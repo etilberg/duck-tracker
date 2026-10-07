@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
 import type { Duck } from '@/lib/db';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://quackertracks.com';
+const APP_URL = typeof window !== 'undefined' ? window.location.origin : 'https://quackertracks.com';
 
 export default function SubmitClient() {
   const [name, setName] = useState('');
