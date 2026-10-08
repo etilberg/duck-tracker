@@ -85,9 +85,7 @@ export default function HomePage() {
       <section className="max-w-5xl mx-auto px-4 py-20 text-center">
         <div className="text-7xl mb-6">🦆</div>
         <h1 className="text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
-          Your Jeep left a duck<br className="hidden sm:block" /> somewhere.
-          <br />
-          <span className="text-yellow-500">Now it can be famous.</span>
+          You&apos;ve been ducked. 🦆
         </h1>
         <p className="text-xl text-gray-600 mb-3 max-w-2xl mx-auto">
           QuackerTracks is a free duck-tracking platform for the Jeep community.
@@ -155,7 +153,7 @@ export default function HomePage() {
           <p className="text-gray-400 text-sm italic">
             🍪 The only cookies around here are{' '}
             <a
-              href="https://www.amazon.com/dp/B0F2PD6K5X/?tag=et0df-20"
+              href="https://www.amazon.com/dp/B07WRN5QXS/?tag=et0df-20"
               target="_blank"
               rel="noopener noreferrer"
               className="text-yellow-400 hover:text-yellow-300 underline underline-offset-2"
