@@ -84,11 +84,6 @@ export default function Footer() {
                   Browse Duck Sightings
                 </Link>
               </li>
-              <li>
-                <Link href="/submit" className="text-gray-400 hover:text-yellow-400 transition-colors">
-                  Submit a Sighting
-                </Link>
-              </li>
             </ul>
           </div>
 

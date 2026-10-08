@@ -71,12 +71,6 @@ export default function HomePage() {
             >
               Browse Map
             </Link>
-            <Link
-              href="/dashboard"
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
-            >
-              My Ducks
-            </Link>
           </div>
         </div>
       </header>
@@ -102,7 +96,7 @@ export default function HomePage() {
             🗺️ Browse the Map
           </Link>
           <Link
-            href="/dashboard"
+            href="/submit"
             className="inline-flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-8 py-4 rounded-xl text-lg transition-colors shadow-sm"
           >
             🦆 Register Your Duck
@@ -170,7 +164,7 @@ export default function HomePage() {
         <h2 className="text-3xl font-bold text-gray-900 mb-3">Ready to duck someone?</h2>
         <p className="text-gray-500 mb-8">Sign in with GitHub to register your ducks and get your QR codes. It takes about 30 seconds.</p>
         <Link
-          href="/dashboard"
+          href="/submit"
           className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-10 py-4 rounded-xl text-lg transition-colors shadow-sm"
         >
           🦆 Get Started — It&apos;s Free
