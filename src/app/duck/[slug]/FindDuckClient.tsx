@@ -89,9 +89,13 @@ export default function FindDuckClient({ duck, initialSightings }: Props) {
     <div className="min-h-screen bg-yellow-50 flex flex-col">
       {/* Header */}
       <header className="bg-white shadow-sm">
-        <div className="max-w-2xl mx-auto px-4 py-4 text-center">
-          <div className="text-4xl mb-1">🦆</div>
-          <h1 className="text-2xl font-bold text-gray-800">{duck.name}</h1>
+        <div className="max-w-2xl mx-auto px-4 py-6 text-center">
+          {/* Name tag */}
+          <div className="inline-block bg-white border-4 border-red-500 rounded-lg px-6 py-3 shadow-md mb-4 text-left min-w-[180px]">
+            <p className="text-red-500 font-bold text-xs uppercase tracking-widest mb-1">Hello, my name is</p>
+            <div className="text-4xl mb-1 text-center">🦆</div>
+            <p className="text-2xl font-extrabold text-gray-900 text-center leading-tight">{duck.name}</p>
+          </div>
           <p className="text-gray-500 text-sm">A travelling Jeep duck</p>
         </div>
       </header>
