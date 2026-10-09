@@ -8,9 +8,9 @@ export async function GET() {
     const db = getDB();
     const [ducks, sightings, locations] = await Promise.all([
       db.prepare('SELECT COUNT(*) as count FROM ducks').first<{ count: number }>(),
-      db.prepare("SELECT COUNT(*) as count FROM sightings WHERE message != 'Duck released here! 🦆'").first<{ count: number }>(),
+      db.prepare("SELECT COUNT(*) as count FROM sightings WHERE message IS NULL OR message != 'Duck released here! 🦆'").first<{ count: number }>(),
       db.prepare(
-        "SELECT COUNT(DISTINCT location_label) as count FROM sightings WHERE location_label IS NOT NULL AND location_label != '' AND message != 'Duck released here! 🦆'"
+        "SELECT COUNT(DISTINCT location_label) as count FROM sightings WHERE location_label IS NOT NULL AND location_label != '' AND (message IS NULL OR message != 'Duck released here! 🦆')"
       ).first<{ count: number }>(),
     ]);
     return NextResponse.json({
