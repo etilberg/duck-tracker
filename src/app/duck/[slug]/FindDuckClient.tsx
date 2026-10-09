@@ -254,7 +254,7 @@ export default function FindDuckClient({ duck, initialSightings }: Props) {
                       {s.finder_name || 'Anonymous'}
                     </span>
                     <span className="text-xs text-gray-400">
-                      #{sightings.length - i} · {new Date(s.found_at).toLocaleDateString()}
+                      #{sightings.length - i} · {new Date(s.found_at).toLocaleDateString('en-US', { timeZone: 'America/Chicago' })}
                     </span>
                   </div>
                   {s.location_label && (

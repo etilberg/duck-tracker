@@ -100,7 +100,7 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
             <p className="text-sm text-gray-500 font-mono mb-1">{duck.slug}</p>
             {duck.notes && <p className="text-sm text-gray-600 mb-3">{duck.notes}</p>}
             <p className="text-xs text-gray-400">
-              Created {new Date(duck.created_at).toLocaleDateString()}
+              Created {new Date(duck.created_at).toLocaleDateString('en-US', { timeZone: 'America/Chicago' })}
             </p>
             <p className="text-lg font-bold text-gray-800 mt-3">
               {initialSightings.length} sighting{initialSightings.length !== 1 ? 's' : ''}
@@ -169,7 +169,7 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
                       {s.finder_name || 'Anonymous finder'}
                     </span>
                     <span className="text-xs text-gray-400">
-                      #{initialSightings.length - i} · {new Date(s.found_at).toLocaleString()}
+                      #{initialSightings.length - i} · {new Date(s.found_at).toLocaleString('en-US', { timeZone: 'America/Chicago' })}
                     </span>
                   </div>
                   {s.location_label && (

@@ -69,7 +69,7 @@ export default function BrowseMap({ sightings }: Props) {
               </span>
               <br />
               <span className="text-gray-400 text-xs">
-                {new Date(s.found_at).toLocaleDateString()}
+                {new Date(s.found_at).toLocaleDateString('en-US', { timeZone: 'America/Chicago' })}
               </span>
               {s.message && (
                 <><br /><em className="text-gray-600">"{s.message}"</em></>
