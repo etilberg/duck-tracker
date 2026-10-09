@@ -23,6 +23,10 @@ const DUCK_PRODUCTS = [
     asin: 'B07WRN5QXS',
     label: 'Chunky Chocolate Cookies (the only cookies here) 🍪',
   },
+  {
+    asin: 'B000067SXG',
+    label: 'DYMO ½″×1″ Labels — perfect for duck QR codes',
+  },
 ];
 
 export default function Footer() {

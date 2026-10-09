@@ -45,6 +45,16 @@ export default function SubmitClient() {
     }
   }
 
+  function downloadQR(duckName: string) {
+    const canvas = document.querySelector<HTMLCanvasElement>('#qr-canvas canvas');
+    if (!canvas) return;
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${duckName.replace(/\s+/g, '-').toLowerCase()}-qr.png`;
+    a.click();
+  }
+
   if (createdDuck) {
     const duckUrl = `${APP_URL}/duck/${createdDuck.slug}`;
     return (
@@ -57,12 +67,32 @@ export default function SubmitClient() {
             Print this QR code and attach it to your duck!
           </p>
 
-          <div className="flex flex-col items-center gap-2 mb-6">
+          <div id="qr-canvas" className="flex flex-col items-center gap-2 mb-4">
             <QRCodeCanvas value={duckUrl} size={200} includeMargin />
             <p className="text-xs text-yellow-700 font-semibold tracking-wide uppercase">
               🦆 Track this duck! Scan to log a sighting
             </p>
           </div>
+
+          <button
+            onClick={() => downloadQR(createdDuck.name)}
+            className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-2 rounded-lg transition-colors mb-4 text-sm"
+          >
+            ⬇️ Download QR Code (PNG)
+          </button>
+
+          <p className="text-xs text-gray-400 mb-2 italic">
+            💡 Print on a{' '}
+            <a
+              href="https://www.amazon.com/dp/B000067SXG/?tag=et0df-20"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-yellow-600 hover:text-yellow-800 underline underline-offset-2"
+            >
+              DYMO ½″ × 1″ label
+            </a>
+            {' '}and stick it right on the duck.
+          </p>
 
           <p className="text-xs text-gray-400 break-all font-mono bg-gray-50 p-2 rounded mb-4">
             {duckUrl}
@@ -79,7 +109,7 @@ export default function SubmitClient() {
               href={duckUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium py-2 rounded-lg transition-colors"
+              className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-2 rounded-lg transition-colors text-sm"
             >
               View duck page
             </a>
