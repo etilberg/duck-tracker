@@ -38,9 +38,42 @@ export default function FindDuckClient({ duck, initialSightings }: Props) {
     }
 
     navigator.geolocation.getCurrentPosition(
-      pos => {
+      async pos => {
         setLat(pos.coords.latitude);
         setLng(pos.coords.longitude);
+
+        // Reverse-geocode to pre-fill the location label
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`,
+            { headers: { 'Accept-Language': 'en' } }
+          );
+          const geo = await res.json() as {
+            address?: {
+              city?: string;
+              town?: string;
+              village?: string;
+              hamlet?: string;
+              state?: string;
+              country?: string;
+              country_code?: string;
+            };
+          };
+          const place =
+            geo.address?.city ||
+            geo.address?.town ||
+            geo.address?.village ||
+            geo.address?.hamlet;
+          const region = geo.address?.state;
+          const isUS = geo.address?.country_code === 'us';
+          const label = isUS
+            ? [place, region].filter(Boolean).join(', ')
+            : [place, region, geo.address?.country].filter(Boolean).join(', ');
+          if (label) setLocationLabel(label);
+        } catch {
+          // geocoding failed — leave the field empty for the user to fill in
+        }
+
         setLocating(false);
         setStep('form');
       },
