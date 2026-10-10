@@ -79,7 +79,7 @@ export default function HomePage() {
       <section className="max-w-5xl mx-auto px-4 py-20 text-center">
         <div className="text-7xl mb-6">🦆</div>
         <h1 className="text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
-          You&apos;ve been ducked. 🦆
+          You&apos;ve been ducked.
         </h1>
         <p className="text-xl text-gray-600 mb-3 max-w-2xl mx-auto">
           QuackerTracks is a free duck-tracking platform for the Jeep community.
