@@ -86,7 +86,7 @@ export default function HomePage() {
           Register your rubber ducks, get QR codes, and watch them travel the world one Jeep at a time.
         </p>
         <p className="text-base text-gray-400 mb-10 italic">
-          We track ducks. Not you. No cookies, no accounts required to browse, no funny business.
+          We track ducks. Not you. No cookies, no accounts required, no funny business.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
