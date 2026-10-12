@@ -62,7 +62,7 @@ export async function notifyPreviousFinders(
       `;
 
       return resend.emails.send({
-        from: 'Duck Tracker <noreply@quackertracks.com>',
+        from: 'QuackerTracks <noreply@quackertracks.com>',
         to: email,
         subject: `🦆 ${duck.name} was found again!`,
         html,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 
 interface Stats {
@@ -44,8 +44,17 @@ const HOW_IT_WORKS = [
   },
 ];
 
+type ContactStep = 'idle' | 'open' | 'sending' | 'done' | 'error';
+
 export default function HomePage() {
   const [stats, setStats] = useState<Stats | null>(null);
+
+  // Contact form state
+  const [contactStep, setContactStep] = useState<ContactStep>('idle');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactError, setContactError] = useState('');
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     fetch('/api/stats')
@@ -53,6 +62,44 @@ export default function HomePage() {
       .then(setStats)
       .catch(() => {/* silently fail — stats are a bonus */});
   }, []);
+
+  function openContact() {
+    setContactStep('open');
+    setContactEmail('');
+    setContactMessage('');
+    setContactError('');
+    dialogRef.current?.showModal();
+  }
+
+  function closeContact() {
+    dialogRef.current?.close();
+    setContactStep('idle');
+  }
+
+  async function submitContact(e: React.FormEvent) {
+    e.preventDefault();
+    setContactStep('sending');
+    setContactError('');
+    const form = e.currentTarget as HTMLFormElement;
+    const honeypot = (form.elements.namedItem('website') as HTMLInputElement)?.value;
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: contactEmail || null,
+          message: contactMessage,
+          website: honeypot || undefined,
+        }),
+      });
+      const data = await res.json() as { ok?: boolean; error?: string };
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Something went wrong');
+      setContactStep('done');
+    } catch (err) {
+      setContactError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      setContactStep('error');
+    }
+  }
 
   return (
     <div className="min-h-screen bg-yellow-50">
@@ -71,6 +118,12 @@ export default function HomePage() {
             >
               Browse Map
             </Link>
+            <button
+              onClick={openContact}
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Contact
+            </button>
           </div>
         </div>
       </header>
@@ -169,7 +222,83 @@ export default function HomePage() {
         >
           🦆 Get Started — It&apos;s Free
         </Link>
+        <p className="mt-8 text-sm text-gray-400">
+          Questions or feedback?{' '}
+          <button onClick={openContact} className="text-yellow-600 hover:text-yellow-800 underline underline-offset-2">
+            Drop us a note
+          </button>
+        </p>
       </section>
+
+      {/* Contact modal */}
+      <dialog
+        ref={dialogRef}
+        className="rounded-2xl shadow-xl p-0 w-full max-w-md backdrop:bg-black/40"
+        onClose={() => setContactStep('idle')}
+      >
+        <div className="p-6">
+          {contactStep === 'done' ? (
+            <div className="text-center py-4">
+              <div className="text-4xl mb-3">🦆✉️</div>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">Message sent!</h2>
+              <p className="text-gray-500 text-sm mb-6">Thanks for reaching out. We&apos;ll get back to you if you left an email.</p>
+              <button
+                onClick={closeContact}
+                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold px-6 py-2.5 rounded-xl transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-800">Send us a message</h2>
+                <button
+                  onClick={closeContact}
+                  className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+              <form onSubmit={submitContact} className="space-y-4">
+                {/* Honeypot — hidden from humans, filled by bots */}
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  style={{ display: 'none' }}
+                />
+                <input
+                  type="email"
+                  value={contactEmail}
+                  onChange={e => setContactEmail(e.target.value)}
+                  placeholder="Your email (optional — for a reply)"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                />
+                <textarea
+                  value={contactMessage}
+                  onChange={e => setContactMessage(e.target.value)}
+                  placeholder="What's on your mind?"
+                  rows={4}
+                  required
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
+                />
+                {contactError && <p className="text-red-600 text-sm">{contactError}</p>}
+                <button
+                  type="submit"
+                  disabled={contactStep === 'sending'}
+                  className="w-full bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-200 text-gray-900 font-bold py-3 rounded-xl transition-colors"
+                >
+                  {contactStep === 'sending' ? 'Sending…' : '✉️ Send Message'}
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      </dialog>
 
     </div>
   );
