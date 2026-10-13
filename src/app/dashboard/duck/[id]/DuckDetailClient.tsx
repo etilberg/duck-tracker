@@ -31,7 +31,15 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
     const maxTextW = outW - sidePad * 2;
     const testCtx = document.createElement('canvas').getContext('2d')!;
 
-    // Duck name at top — as large as fits
+    // "My name is" — auto-sized, regular weight
+    let labelFontSize = 10;
+    for (let size = 10; size <= outW; size += 2) {
+      testCtx.font = `${size}px sans-serif`;
+      if (testCtx.measureText('My name is').width > maxTextW) break;
+      labelFontSize = size;
+    }
+
+    // Duck name — auto-sized, bold
     let nameFontSize = 10;
     for (let size = 10; size <= outW; size += 2) {
       testCtx.font = `bold ${size}px sans-serif`;
@@ -39,7 +47,7 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
       nameFontSize = size;
     }
 
-    // "Track this duck!" tagline — auto-sized to fit, same logic as name
+    // "Track this duck!" tagline — auto-sized to fit
     let tagFontSize = 10;
     for (let size = 10; size <= outW; size += 2) {
       testCtx.font = `${size}px sans-serif`;
@@ -47,13 +55,14 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
       tagFontSize = size;
     }
 
+    const gap = Math.round(outW * 0.03);
+    const labelH = Math.round(labelFontSize * 1.3);
     const nameH = Math.round(nameFontSize * 1.3);
     const tagH = Math.round(tagFontSize * 1.3);
-    const gap = Math.round(outW * 0.03);
 
     const composite = document.createElement('canvas');
     composite.width = outW;
-    composite.height = nameH + gap + outH + gap + tagH;
+    composite.height = labelH + nameH + gap + outH + gap + tagH;
 
     const ctx = composite.getContext('2d');
     if (!ctx) return;
@@ -64,18 +73,23 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
 
+    // "My name is"
+    ctx.fillStyle = '#555555';
+    ctx.font = `${labelFontSize}px sans-serif`;
+    ctx.fillText('My name is', outW / 2, 0);
+
     // Duck name
     ctx.fillStyle = '#111111';
     ctx.font = `bold ${nameFontSize}px sans-serif`;
-    ctx.fillText(duck.name, outW / 2, 0);
+    ctx.fillText(duck.name, outW / 2, labelH);
 
     // QR code
-    ctx.drawImage(qrCanvas, 0, nameH + gap, outW, outH);
+    ctx.drawImage(qrCanvas, 0, labelH + nameH + gap, outW, outH);
 
     // Tagline
     ctx.fillStyle = '#555555';
     ctx.font = `${tagFontSize}px sans-serif`;
-    ctx.fillText('Track this duck!', outW / 2, nameH + gap + outH + gap);
+    ctx.fillText('Track this duck!', outW / 2, labelH + nameH + gap + outH + gap);
 
     const a = document.createElement('a');
     a.href = composite.toDataURL('image/png');
