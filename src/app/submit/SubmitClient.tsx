@@ -53,7 +53,6 @@ export default function SubmitClient() {
     const outW = qrCanvas.width * scale;
     const outH = qrCanvas.height * scale;
 
-    // Measure fonts for name (top) and tagline (bottom)
     const sidePad = Math.round(outW * 0.04);
     const maxTextW = outW - sidePad * 2;
     const testCtx = document.createElement('canvas').getContext('2d')!;
@@ -74,22 +73,23 @@ export default function SubmitClient() {
       nameFontSize = size;
     }
 
-    // "Track this duck!" tagline — auto-sized to fit
+    // Tagline sized on "Track this" (wider of the two lines)
     let tagFontSize = 10;
     for (let size = 10; size <= outW; size += 2) {
       testCtx.font = `${size}px sans-serif`;
-      if (testCtx.measureText('Track this duck!').width > maxTextW) break;
+      if (testCtx.measureText('Track this').width > maxTextW) break;
       tagFontSize = size;
     }
 
-    const gap = Math.round(outW * 0.03);
+    const topGap = Math.round(outW * 0.01);   // tight gap: name → QR
+    const gap = Math.round(outW * 0.03);      // normal gap: QR → tagline
     const labelH = Math.round(labelFontSize * 1.3);
     const nameH = Math.round(nameFontSize * 1.3);
-    const tagH = Math.round(tagFontSize * 1.3);
+    const tagLineH = Math.round(tagFontSize * 1.3);
 
     const composite = document.createElement('canvas');
     composite.width = outW;
-    composite.height = labelH + nameH + gap + outH + gap + tagH;
+    composite.height = labelH + nameH + topGap + outH + gap + tagLineH * 2;
 
     const ctx = composite.getContext('2d');
     if (!ctx) return;
@@ -101,22 +101,25 @@ export default function SubmitClient() {
     ctx.textBaseline = 'top';
 
     // "My name is"
-    ctx.fillStyle = '#555555';
+    ctx.fillStyle = '#000000';
     ctx.font = `${labelFontSize}px sans-serif`;
     ctx.fillText('My name is', outW / 2, 0);
 
     // Duck name
-    ctx.fillStyle = '#111111';
+    ctx.fillStyle = '#000000';
     ctx.font = `bold ${nameFontSize}px sans-serif`;
     ctx.fillText(duckName, outW / 2, labelH);
 
-    // QR code
-    ctx.drawImage(qrCanvas, 0, labelH + nameH + gap, outW, outH);
+    // QR code (smaller gap above)
+    ctx.drawImage(qrCanvas, 0, labelH + nameH + topGap, outW, outH);
 
-    // "Track this duck!" tagline at bottom
-    ctx.fillStyle = '#555555';
+    // "Track this" — line 1
+    ctx.fillStyle = '#000000';
     ctx.font = `${tagFontSize}px sans-serif`;
-    ctx.fillText('Track this duck!', outW / 2, labelH + nameH + gap + outH + gap);
+    ctx.fillText('Track this', outW / 2, labelH + nameH + topGap + outH + gap);
+
+    // "duck!" — line 2
+    ctx.fillText('duck!', outW / 2, labelH + nameH + topGap + outH + gap + tagLineH);
 
     const a = document.createElement('a');
     a.href = composite.toDataURL('image/png');
