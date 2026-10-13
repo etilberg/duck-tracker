@@ -46,11 +46,62 @@ export default function SubmitClient() {
   }
 
   function downloadQR(duckName: string) {
-    const canvas = document.querySelector<HTMLCanvasElement>('#qr-canvas canvas');
-    if (!canvas) return;
-    const url = canvas.toDataURL('image/png');
+    const qrCanvas = document.querySelector<HTMLCanvasElement>('#qr-canvas canvas');
+    if (!qrCanvas) return;
+
+    const scale = Math.max(1, Math.ceil(600 / qrCanvas.width));
+    const outW = qrCanvas.width * scale;
+    const outH = qrCanvas.height * scale;
+
+    // Measure fonts for name (top) and tagline (bottom)
+    const sidePad = Math.round(outW * 0.04);
+    const maxTextW = outW - sidePad * 2;
+
+    const testCtx = document.createElement('canvas').getContext('2d')!;
+
+    // Duck name — as large as fits
+    let nameFontSize = 10;
+    for (let size = 10; size <= outW; size += 2) {
+      testCtx.font = `bold ${size}px sans-serif`;
+      if (testCtx.measureText(duckName).width > maxTextW) break;
+      nameFontSize = size;
+    }
+
+    // "Track this duck!" tagline — smaller, fixed relative to QR width
+    const tagFontSize = Math.round(outW * 0.06);
+
+    const nameH = Math.round(nameFontSize * 1.3);
+    const tagH = Math.round(tagFontSize * 1.3);
+    const gap = Math.round(outW * 0.03);
+
+    const composite = document.createElement('canvas');
+    composite.width = outW;
+    composite.height = nameH + gap + outH + gap + tagH;
+
+    const ctx = composite.getContext('2d');
+    if (!ctx) return;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, composite.width, composite.height);
+    ctx.imageSmoothingEnabled = false;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+
+    // Duck name at top
+    ctx.fillStyle = '#111111';
+    ctx.font = `bold ${nameFontSize}px sans-serif`;
+    ctx.fillText(duckName, outW / 2, 0);
+
+    // QR code
+    ctx.drawImage(qrCanvas, 0, nameH + gap, outW, outH);
+
+    // "Track this duck!" tagline at bottom
+    ctx.fillStyle = '#555555';
+    ctx.font = `${tagFontSize}px sans-serif`;
+    ctx.fillText('Track this duck!', outW / 2, nameH + gap + outH + gap);
+
     const a = document.createElement('a');
-    a.href = url;
+    a.href = composite.toDataURL('image/png');
     a.download = `${duckName.replace(/\s+/g, '-').toLowerCase()}-qr.png`;
     a.click();
   }

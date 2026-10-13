@@ -27,28 +27,28 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
     const outW = qrCanvas.width * scale;
     const outH = qrCanvas.height * scale;
 
-    const lines = ['Track', 'this', 'duck!'];
-    const gapAboveText = Math.round(outW * 0.03);
-    const paddingBelow = Math.round(outW * 0.03);
-
-    // Largest font where the widest word still fits the QR width
-    const sidePad = Math.round(outW * 0.02);
+    const sidePad = Math.round(outW * 0.04);
     const maxTextW = outW - sidePad * 2;
-    const widest = lines.reduce((a, b) => (a.length >= b.length ? a : b));
-    let fontSize = 10;
+    const testCtx = document.createElement('canvas').getContext('2d')!;
+
+    // Duck name at top — as large as fits
+    let nameFontSize = 10;
     for (let size = 10; size <= outW; size += 2) {
-      const testCtx = document.createElement('canvas').getContext('2d')!;
       testCtx.font = `bold ${size}px sans-serif`;
-      if (testCtx.measureText(widest).width > maxTextW) break;
-      fontSize = size;
+      if (testCtx.measureText(duck.name).width > maxTextW) break;
+      nameFontSize = size;
     }
 
-    const lineH = Math.round(fontSize * 1.15);
-    const textAreaHeight = lines.length * lineH + gapAboveText + paddingBelow;
+    // "Track this duck!" tagline at bottom
+    const tagFontSize = Math.round(outW * 0.06);
+
+    const nameH = Math.round(nameFontSize * 1.3);
+    const tagH = Math.round(tagFontSize * 1.3);
+    const gap = Math.round(outW * 0.03);
 
     const composite = document.createElement('canvas');
     composite.width = outW;
-    composite.height = outH + textAreaHeight;
+    composite.height = nameH + gap + outH + gap + tagH;
 
     const ctx = composite.getContext('2d');
     if (!ctx) return;
@@ -56,19 +56,25 @@ export default function DuckDetailClient({ duck, initialSightings }: Props) {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, composite.width, composite.height);
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(qrCanvas, 0, 0, outW, outH);
-
-    ctx.fillStyle = '#000000';
-    ctx.font = `bold ${fontSize}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    lines.forEach((line, i) => {
-      ctx.fillText(line, outW / 2, outH + gapAboveText + i * lineH);
-    });
+
+    // Duck name
+    ctx.fillStyle = '#111111';
+    ctx.font = `bold ${nameFontSize}px sans-serif`;
+    ctx.fillText(duck.name, outW / 2, 0);
+
+    // QR code
+    ctx.drawImage(qrCanvas, 0, nameH + gap, outW, outH);
+
+    // Tagline
+    ctx.fillStyle = '#555555';
+    ctx.font = `${tagFontSize}px sans-serif`;
+    ctx.fillText('Track this duck!', outW / 2, nameH + gap + outH + gap);
 
     const a = document.createElement('a');
     a.href = composite.toDataURL('image/png');
-    a.download = `duck-${duck.slug}.png`;
+    a.download = `${duck.name.replace(/\s+/g, '-').toLowerCase()}-qr.png`;
     a.click();
   }
 
