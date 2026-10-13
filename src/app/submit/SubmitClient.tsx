@@ -67,8 +67,13 @@ export default function SubmitClient() {
       nameFontSize = size;
     }
 
-    // "Track this duck!" tagline — smaller, fixed relative to QR width
-    const tagFontSize = Math.round(outW * 0.06);
+    // "Track this duck!" tagline — auto-sized to fit, same logic as name
+    let tagFontSize = 10;
+    for (let size = 10; size <= outW; size += 2) {
+      testCtx.font = `${size}px sans-serif`;
+      if (testCtx.measureText('Track this duck!').width > maxTextW) break;
+      tagFontSize = size;
+    }
 
     const nameH = Math.round(nameFontSize * 1.3);
     const tagH = Math.round(tagFontSize * 1.3);
